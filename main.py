@@ -6,7 +6,6 @@ from langchain_community.vectorstores import Chroma
 from chromadb import PersistentClient
 from langchain_openai import ChatOpenAI  # ✅ 최신 경로로 변경
 from langchain.schema import HumanMessage
-
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -25,7 +24,6 @@ chroma_store = Chroma(
 )
 
 # Chroma check
-
 
 client = PersistentClient(path="./chroma_db")  # Chroma 저장 경로 확인
 #print(client.list_collections())  # 저장된 컬렉션 리스트 출력
