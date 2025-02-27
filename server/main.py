@@ -6,17 +6,6 @@ from langchain_openai import ChatOpenAI
 from langchain.schema import HumanMessage
 from chromadb import PersistentClient
 
-__import__('pysqlite3')
-import sys
-sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-    }
-}
-
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -30,7 +19,8 @@ if not openai_api_key:
 chroma_store = Chroma(
     embedding_function=OpenAIEmbeddings(),
     persist_directory="chroma_db",  # 기존 저장된 Chroma DB 경로
-    collection_name="bakery_vector_store"  # 기존 컬렉션 이름
+    collection_name="bakery_vector_store",  # 기존 컬렉션 이름
+    openai_proxy="http://krmp-proxy.9rum.cc:3128"
 )
 
 client = PersistentClient(path="./chroma_db") 
@@ -44,16 +34,16 @@ print(f"저장된 벡터 개수: {len(docs['ids'])}")
 
 
 class AIModel():
-    def request(personality_query):
+    def request(self, personality_query):
 
         # 2. Chroma 벡터스토어에서 사용자 성격과 유사한 빵집 문서를 검색 (예: 상위 3개)
-        similar_docs = chroma_store.similarity_search(personality_query, k=3)
+        similar_docs = chroma_store.similarity_search(personality_query, k=1)
         print("판교의 빵집을 찾아다니고 있습니다....")
 
         # 3. 추천 프롬프트 구성  
         #    - 후보 빵집들의 정보를 나열하고, 재미있는 추천과 추천 이유를 요청하는 형태로 구성
         recommendation_prompt = f"사용자의 성격: {personality_query}\n\n"
-        recommendation_prompt += "다음 빵집 후보들 중에서 사용자에게 가장 어울리는 서로 다른 빵집을 세 개 추천해줘.\n"
+        recommendation_prompt += "다음 빵집 후보들 중에서 사용자에게 가장 어울리는 빵집을 단 하나만 추천해줘.\n"
         recommendation_prompt += "반드시 서로 다른 빵집이어야 하고, 반드시 문서에 있는 빵집이어야 해."
 
         for doc in similar_docs:
