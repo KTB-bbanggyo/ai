@@ -8,7 +8,7 @@ WORKDIR /app
 
 COPY . /app
 
-RUN pip install --no-cache-dir fastapi torch uvicorn numpy langchain_openai langchain_community chromadb
+RUN pip install --no-cache-dir fastapi uvicorn langchain_openai langchain_community chromadb python-dotenv
 
 EXPOSE 8000
 
