@@ -71,28 +71,28 @@ class AIModel():
         )
         explanation = llm.invoke([HumanMessage(content=explanation_prompt)])
 
-
         text = similar_docs[0].page_content
+        print(text, '\n')
 
-        # 빵집 이름 추출
         bakery_name_match = re.search(r'빵집 이름:\s*(.+)', text)
         bakery_name = bakery_name_match.group(1).strip() if bakery_name_match else None
 
-        # 총점 추출 (평점: 총점 부분)
         overall_score_match = re.search(r'총점\s*([\d.]+)', text)
         overall_score = overall_score_match.group(1).strip() if overall_score_match else None
 
         taste_score_match = re.search(r'맛\s*([\d.]+)', text)
-        taste_score = overall_score_match.group(1).strip() if taste_score_match else None
+        taste_score = taste_score_match.group(1).strip() if taste_score_match else None
 
         price_score_match = re.search(r'가격\s*([\d.]+)', text)
-        price_score = overall_score_match.group(1).strip() if price_score_match else None
+        price_score = price_score_match.group(1).strip() if price_score_match else None
+
+        address_match = re.search(r'주소:\s*(.+)', text)
+        address = address_match.group(1).strip() if address_match else None
 
         cs_score_match = re.search(r'고객서비스\s*([\d.]+)', text)
-        cs_score = overall_score_match.group(1).strip() if cs_score_match else None
+        cs_score = cs_score_match.group(1).strip() if cs_score_match else None
 
         review_keywords = re.findall(r'키워드:\s*([^)]+)', text)
-
         unique_keywords = sorted({kw.strip() for group in review_keywords for kw in group.split(",")})
 
 
@@ -102,20 +102,10 @@ class AIModel():
             "taste_score": taste_score,
             "price_score": price_score,
             "cs_score": cs_score,
-            "keywords": review_keywords,
+            "address": address,
+            "keywords": unique_keywords,
             "explanation": explanation.content
         }
-
-        unique_keywords = set()
-        for keyword_group in result["keywords"]:
-            keywords = [kw.strip() for kw in keyword_group.split(",")]
-            unique_keywords.update(keywords)
-
-        # 집합을 리스트로 변환 및 정렬(선택사항)
-        final_keywords = sorted(list(unique_keywords))
-
-        # data 딕셔너리의 keywords 필드 업데이트
-        result["keywords"] = final_keywords
 
         print(result)
         return result
